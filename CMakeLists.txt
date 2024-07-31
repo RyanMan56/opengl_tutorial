@@ -1,0 +1,36 @@
+cmake_minimum_required(VERSION 3.15)
+
+# Will cause cmake to define the variables OpenglTutorial_VERSION_MAJOR and OpenglTutorial_VERSION_MINOR
+project(OpenglTutorial VERSION 1.0)
+
+# Provide a single source of truth for compiler flags
+add_library(opengl_tutorial_compiler_flags INTERFACE)
+target_compile_features(opengl_tutorial_compiler_flags INTERFACE cxx_std_20)
+
+# Compiler conditionals
+set(gcc_like_cxx "$<COMPILE_LANG_AND_ID:CXX,ARMClang,AppleClang,Clang,GNU,LCC>")
+set(msvc_like_cxx "$<COMPILE_LANG_AND_ID:CXX,MSVC>")
+
+# Add compile warning flags based on the compiler used from the flags above
+target_compile_options(opengl_tutorial_compiler_flags INTERFACE
+  "$<${gcc_like_cxx}:$<BUILD_INTERFACE:-fcolor-diagnostics;-fansi-escape-codes;-Wall;-Wextra;-Wconversion;-Wsign-conversion;-Wshadow;-Wformat=2;-Wunused>>"
+  "$<${msvc_like_cxx}:$<BUILD_INTERFACE:-W3>>"
+)
+
+# Control where the static and shared libraries are built so that on windows
+# we don't need to mess with the PATH to run the executable
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
+
+option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
+
+add_executable(OpenglTutorial src/main.cpp)
+
+# Link the libraries to our executable
+target_link_libraries(OpenglTutorial PUBLIC opengl_tutorial_compiler_flags)
+
+target_include_directories(OpenglTutorial PUBLIC "${PROJECT_BINARY_DIR}/src")
+
+# Install executables to the bin directory
+install(TARGETS OpenglTutorial DESTINATION bin)
