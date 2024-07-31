@@ -6,7 +6,8 @@ The CMake build system has been put together largely inspired by the official CM
 
 ## How to build and run
 
-1. Create a `build` directory, e.g. `mkdir build`
-2. Generate a native build system, `cd build && cmake ..`
-3. Compile/link the project, `cmake --build .`
-4. Run the project `./bin/OpenglTutorial` (assuming you're on mac/linux. You'll probably just want to open and run the project in VS if you're on windows)
+1. This project uses git submodules to include dependencies, so first make sure to run `git submodule update --init --recursive` if you haven't done a deep clone already
+2. Create a `build` directory, e.g. `mkdir build`
+3. Generate a native build system, `cd build && cmake ..`
+4. Compile/link the project, `cmake --build .`
+5. Run the project `./bin/OpenglTutorial` (assuming you're on mac/linux. You'll probably just want to open and run the project in VS if you're on windows)

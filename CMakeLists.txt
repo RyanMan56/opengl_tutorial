@@ -27,8 +27,15 @@ option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 
 add_executable(OpenglTutorial src/main.cpp)
 
+# Add GLFW as a subdirectory
+add_subdirectory(external/glfw)
+
+# Find and link OpenGL (this will be provided by the graphics drivers and the operating system)
+find_package(OpenGL REQUIRED)
+
 # Link the libraries to our executable
 target_link_libraries(OpenglTutorial PUBLIC opengl_tutorial_compiler_flags)
+target_link_libraries(OpenglTutorial PRIVATE glfw OpenGL::GL)
 
 target_include_directories(OpenglTutorial PUBLIC "${PROJECT_BINARY_DIR}/src")
 
