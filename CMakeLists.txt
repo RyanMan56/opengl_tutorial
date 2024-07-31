@@ -17,11 +17,16 @@ target_compile_options(opengl_tutorial_compiler_flags INTERFACE
   "$<${msvc_like_cxx}:$<BUILD_INTERFACE:-W3>>"
 )
 
-# Control where the static and shared libraries are built so that on windows
+# Control where the static and shared libraries are built so that on Windows
 # we don't need to mess with the PATH to run the executable
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/lib")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
+
+# Don't build the GLFW docs/tests/examples
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 
@@ -38,7 +43,9 @@ target_link_libraries(OpenglTutorial PUBLIC opengl_tutorial_compiler_flags)
 target_link_libraries(OpenglTutorial PRIVATE glfw OpenGL::GL)
 
 # Ensure the include directories are correctly set
-target_include_directories(OpenglTutorial PRIVATE "${PROJECT_SOURCE_DIR}/external/glfw/include/GLFW")
+target_include_directories(OpenglTutorial PRIVATE
+  "${PROJECT_SOURCE_DIR}/external"
+)
 target_include_directories(OpenglTutorial PUBLIC "${PROJECT_BINARY_DIR}/src")
 
 # Install the executable to the bin directory
