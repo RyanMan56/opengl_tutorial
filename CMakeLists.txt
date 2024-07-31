@@ -34,13 +34,14 @@ add_executable(OpenglTutorial src/main.cpp)
 
 # Add GLFW as a subdirectory
 add_subdirectory(external/glfw)
+add_subdirectory(external/glad)
 
 # Find and link OpenGL (this will be provided by the graphics drivers and the operating system)
 find_package(OpenGL REQUIRED)
 
 # Link the compiler flags and libraries to the executable
 target_link_libraries(OpenglTutorial PUBLIC opengl_tutorial_compiler_flags)
-target_link_libraries(OpenglTutorial PRIVATE glfw OpenGL::GL)
+target_link_libraries(OpenglTutorial PRIVATE glfw OpenGL::GL glad)
 
 # Ensure the include directories are correctly set
 target_include_directories(OpenglTutorial PRIVATE
