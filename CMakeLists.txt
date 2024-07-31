@@ -33,11 +33,13 @@ add_subdirectory(external/glfw)
 # Find and link OpenGL (this will be provided by the graphics drivers and the operating system)
 find_package(OpenGL REQUIRED)
 
-# Link the libraries to our executable
+# Link the compiler flags and libraries to the executable
 target_link_libraries(OpenglTutorial PUBLIC opengl_tutorial_compiler_flags)
 target_link_libraries(OpenglTutorial PRIVATE glfw OpenGL::GL)
 
+# Ensure the include directories are correctly set
+target_include_directories(OpenglTutorial PRIVATE "${PROJECT_SOURCE_DIR}/external/glfw/include/GLFW")
 target_include_directories(OpenglTutorial PUBLIC "${PROJECT_BINARY_DIR}/src")
 
-# Install executables to the bin directory
+# Install the executable to the bin directory
 install(TARGETS OpenglTutorial DESTINATION bin)
