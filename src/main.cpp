@@ -13,9 +13,11 @@ const char *vertexShaderSource{
 const char *fragmentShaderSource{
     "#version 330 core\n"
     "out vec4 FragColor;\n"
+    "uniform vec4 ourColor;\n" // We set this variable in the OpenGL code
     "void main()\n"
     "{\n"
-    "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+    // "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+    "   FragColor = ourColor;"
     "}\n"};
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
@@ -206,8 +208,13 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        float timeValue{static_cast<float>(glfwGetTime())};
+        float greenValue{(sin(timeValue) / 2.0f) + 0.5f};
+        int vertexColorLocation{glGetUniformLocation(shaderProgram, "ourColor")};
+
         // Sets the current active shader program used in every subsequent shader and rendering call
         glUseProgram(shaderProgram);
+        glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
         glBindVertexArray(VAO);
         // Draw primitives using the currently active shader. Params are:
         //      mode: Specifies the kind of primitive to render, can be one of: GL_POINTS, GL_LINE_STRIP, GL_LINE_LOOP, GL_LINES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN, GL_TRIANGLES, GL_QUAD_STRIP, GL_QUADS, GL_POLYGON
