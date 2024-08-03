@@ -1,28 +1,9 @@
+#include "shader.h"
+
 #include <iostream>
+#include <filesystem>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-
-const char *vertexShaderSource{
-    "#version 330 core\n"                   // Specify the GLSL version (this matches the OpenGL version)
-    "layout (location = 0) in vec3 aPos;\n" // Specify input vertex attributes using the "in" keyword. Also specifically set the location of the input variable using "layout"
-    "layout (location = 1) in vec3 aColor;\n"
-    "out vec3 ourColor;\n" // Outputs a colour to the fragment shader
-    "void main()\n"
-    "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n" // Assign the position to the predefined gl_Position vec4
-    "   ourColor = aColor;\n"                               // Set ourColor to the input color we got from the vertex data
-    "}\0"};
-
-const char *fragmentShaderSource{
-    "#version 330 core\n"
-    "out vec4 FragColor;\n"
-    // "uniform vec4 uniformColor;\n" // We can set this variable in the OpenGL code
-    "in vec3 ourColor;\n"
-    "void main()\n"
-    "{\n"
-    // "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-    "   FragColor = vec4(ourColor, 1.0);\n"
-    "}\n"};
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
@@ -33,38 +14,6 @@ void processInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-}
-
-void checkShaderCompilation(unsigned int &shader, std::string_view shaderType)
-{
-    // Check if the shader compiled successfully
-    int success;
-    char infoLog[512];
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-
-    // Display an error if the shader failed to compile
-    if (!success)
-    {
-        glGetShaderInfoLog(shader, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER::" << shaderType << "::COMPILATION_FAILED\n"
-                  << infoLog << '\n';
-    }
-}
-
-void checkShaderProgramLinkage(unsigned int &shaderProgram)
-{
-    // Check if the shader program linked successfully
-    int success;
-    char infoLog[512];
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-
-    // Display an error if the shader program failed to link
-    if (!success)
-    {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-        std::cout << "ERROR::SHADER_PROGRAM::LINKAGE_FAILED\n"
-                  << infoLog << '\n';
-    }
 }
 
 int main()
@@ -96,30 +45,7 @@ int main()
     glViewport(0, 0, 800, 600);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-    // Create the shader, assign the source code to the shader object, and compile the shader
-    unsigned int vertexShader;
-    vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-    glCompileShader(vertexShader);
-    checkShaderCompilation(vertexShader, "VERTEX");
-
-    unsigned int fragmentShader;
-    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-    glCompileShader(fragmentShader);
-    checkShaderCompilation(fragmentShader, "FRAGMENT");
-
-    // Create a shader program, which is multiple shaders linked together. Outputs of each shader are linked to the inputs of the next shader
-    unsigned int shaderProgram;
-    shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram); // Shaders are linked together here
-    checkShaderProgramLinkage(shaderProgram);
-
-    // Now the shaders are linked to the shader program we no longer need them, so are free to delete them
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+    Shader shader{"./shaders/basic.vs.glsl", "./shaders/basic.fs.glsl"};
 
     // We can use Element Buffer Objects to allow us to specify only the required vertices once, and then specify a separate array of indices to say which
     // vertex we should be drawing. Otherwise we would have to include the commented out vertices below, which would add an overhead of 50%
@@ -222,11 +148,11 @@ int main()
         // Can set a uniform which is accessible by all shaders in our shader program
         float timeValue{static_cast<float>(glfwGetTime())};
         float greenValue{(sin(timeValue) / 2.0f) + 0.5f};
-        int vertexColorLocation{glGetUniformLocation(shaderProgram, "uniformColor")};
 
         // Sets the current active shader program used in every subsequent shader and rendering call
-        glUseProgram(shaderProgram);
-        glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+        shader.use();
+        shader.setFloat4("uniformColor", 0.0f, greenValue, 0.0f, 1.0f);
+
         glBindVertexArray(VAO);
         // Draw primitives using the currently active shader. Params are:
         //      mode: Specifies the kind of primitive to render, can be one of: GL_POINTS, GL_LINE_STRIP, GL_LINE_LOOP, GL_LINES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN, GL_TRIANGLES, GL_QUAD_STRIP, GL_QUADS, GL_POLYGON
@@ -249,7 +175,7 @@ int main()
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
     glDeleteBuffers(1, &EBO);
-    glDeleteProgram(shaderProgram);
+    shader.deleteShaderProgram();
 
     glfwTerminate();
 

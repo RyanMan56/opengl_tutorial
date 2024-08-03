@@ -28,9 +28,25 @@ set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
+# Copy shader files to build directory
+set(SHADER_SOURCE_DIR "${CMAKE_SOURCE_DIR}/src/shaders")
+set(SHADER_DEST_DIR "${CMAKE_BINARY_DIR}/shaders")
+
+# Make sure the shader destination directory exists
+file(MAKE_DIRECTORY ${SHADER_DEST_DIR})
+
+# Copy shader files
+file(GLOB SHADER_FILES "${SHADER_SOURCE_DIR}/*")
+file(COPY ${SHADER_FILES} DESTINATION ${SHADER_DEST_DIR})
+
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 
-add_executable(OpenglTutorial src/main.cpp)
+# Gathers all cpp files in the src directory recursively
+# NOTE: I will need to regenerate build files after adding any new files,
+# as these won't be automatically picked up
+file(GLOB_RECURSE SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/*.cpp")
+
+add_executable(OpenglTutorial src/main.cpp ${SOURCE_FILES})
 
 # Add GLFW as a subdirectory
 add_subdirectory(external/glfw)
