@@ -42,7 +42,9 @@ int main()
         return -1;
     }
 
-    glViewport(0, 0, 800, 600);
+    int framebufferWidth, framebufferHeight;
+    glfwGetFramebufferSize(window, &framebufferWidth, &framebufferHeight);
+    glViewport(0, 0, framebufferWidth, framebufferHeight);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
     Shader shader{"./shaders/basic.vs.glsl", "./shaders/basic.fs.glsl"};
