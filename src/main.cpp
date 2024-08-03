@@ -5,19 +5,23 @@
 const char *vertexShaderSource{
     "#version 330 core\n"                   // Specify the GLSL version (this matches the OpenGL version)
     "layout (location = 0) in vec3 aPos;\n" // Specify input vertex attributes using the "in" keyword. Also specifically set the location of the input variable using "layout"
+    "layout (location = 1) in vec3 aColor;\n"
+    "out vec3 ourColor;\n" // Outputs a colour to the fragment shader
     "void main()\n"
     "{\n"
     "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n" // Assign the position to the predefined gl_Position vec4
+    "   ourColor = aColor;\n"                               // Set ourColor to the input color we got from the vertex data
     "}\0"};
 
 const char *fragmentShaderSource{
     "#version 330 core\n"
     "out vec4 FragColor;\n"
-    "uniform vec4 ourColor;\n" // We set this variable in the OpenGL code
+    // "uniform vec4 uniformColor;\n" // We can set this variable in the OpenGL code
+    "in vec3 ourColor;\n"
     "void main()\n"
     "{\n"
     // "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-    "   FragColor = ourColor;"
+    "   FragColor = vec4(ourColor, 1.0);\n"
     "}\n"};
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
@@ -121,14 +125,16 @@ int main()
     // vertex we should be drawing. Otherwise we would have to include the commented out vertices below, which would add an overhead of 50%
     float vertices[]{
         // First triangle
-        0.5f, 0.5f, 0.0f,  // top right
-        0.5f, -0.5f, 0.0f, // bottom right
+        // Positions      // Colors
+        0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f,  // top right
+        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom right
         // -0.5f, 0.5f, 0.0f,  // top left
 
         // Second triangle
+        // Positions        // Colors
         // 0.5f, -0.5f, 0.0f,  // bottom right
-        -0.5f, -0.5f, 0.0f, // bottom left
-        -0.5f, 0.5f, 0.0f,  // top left
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom left
+        -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f,  // top left
     };
     unsigned int indices[]{
         0, 1, 3, // First triangle
@@ -182,10 +188,15 @@ int main()
     //      pointer is a void* since there is no offset to the position data, it is at the beginning of the array
     //
     //  Since the previously defined VBO is still bound to GL_ARRAY_BUFFER when calling glVertexAttribPointer, vertex attribute 0 is now associated with its vertex data
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
-
+    // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+    // Updating because the vertex array now also also contains colours:
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
     // Now we enable the "position" vertex attribute
     glEnableVertexAttribArray(0);
+
+    // Setting the (location = 1) aColor attributes
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float))); // Offset is 3 * the size of a float, since the color attribute starts after the position data
+    glEnableVertexAttribArray(1);
 
     // The call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object, so afterwards we can safely unbind
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -208,9 +219,10 @@ int main()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        // Can set a uniform which is accessible by all shaders in our shader program
         float timeValue{static_cast<float>(glfwGetTime())};
         float greenValue{(sin(timeValue) / 2.0f) + 0.5f};
-        int vertexColorLocation{glGetUniformLocation(shaderProgram, "ourColor")};
+        int vertexColorLocation{glGetUniformLocation(shaderProgram, "uniformColor")};
 
         // Sets the current active shader program used in every subsequent shader and rendering call
         glUseProgram(shaderProgram);
