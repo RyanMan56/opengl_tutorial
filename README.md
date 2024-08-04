@@ -11,3 +11,7 @@ The CMake build system has been put together largely inspired by the official CM
 3. Generate a native build system, `cd build && cmake ..`
 4. Compile/link the project, `cmake --build .`
 5. Run the project `./bin/OpenglTutorial` (assuming you're on mac/linux. You'll probably just want to open and run the project in VS if you're on windows)
+
+### Note
+
+When adding a new .cpp file make sure to run `cmake ..` e.g. `cmake .. && cmake --build . && ./bin/OpenglTutorial` otherwise the change to the sources won't get picked up by CMake
