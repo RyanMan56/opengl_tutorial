@@ -1,8 +1,10 @@
 #include "part1.h"
 #include "shader.h"
 
+#include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <stb_image/stb_image.h>
 
 void processInput(GLFWwindow *window)
 {
@@ -12,22 +14,22 @@ void processInput(GLFWwindow *window)
 
 void part1(GLFWwindow *window)
 {
-    Shader shader{"./shaders/basic.vs.glsl", "./shaders/basic.fs.glsl"};
+    Shader shader{"../shaders/basic.vs.glsl", "../shaders/basic.fs.glsl"};
 
     // We can use Element Buffer Objects to allow us to specify only the required vertices once, and then specify a separate array of indices to say which
     // vertex we should be drawing. Otherwise we would have to include the commented out vertices below, which would add an overhead of 50%
     float vertices[]{
         // First triangle
-        // Positions      // Colors
-        0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f,  // top right
-        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom right
+        // Positions      // Colors         // Texture coords
+        0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,  // top right
+        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
         // -0.5f, 0.5f, 0.0f,  // top left
 
         // Second triangle
-        // Positions        // Colors
+        // Positions        // Colors       // Texture coords
         // 0.5f, -0.5f, 0.0f,  // bottom right
-        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom left
-        -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f,  // top left
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
+        -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f   // top left
     };
     unsigned int indices[]{
         0, 1, 3, // First triangle
@@ -82,14 +84,16 @@ void part1(GLFWwindow *window)
     //
     //  Since the previously defined VBO is still bound to GL_ARRAY_BUFFER when calling glVertexAttribPointer, vertex attribute 0 is now associated with its vertex data
     // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
-    // Updating because the vertex array now also also contains colours:
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
+    // Updated stride to 8 instead of 3 since we have more components in our array
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
     // Now we enable the "position" vertex attribute
     glEnableVertexAttribArray(0);
-
     // Setting the (location = 1) aColor attributes
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float))); // Offset is 3 * the size of a float, since the color attribute starts after the position data
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float))); // Offset is 3 * the size of a float, since the color attribute starts after the position data
     glEnableVertexAttribArray(1);
+    // texture coords attribute:
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 
     // The call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object, so afterwards we can safely unbind
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -99,6 +103,42 @@ void part1(GLFWwindow *window)
 
     // We can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO (but this rarely happens so isn't really necessary)
     glBindVertexArray(0);
+
+    // Load and create texture
+    int width, height, numberOfChannels;
+    unsigned char *data{stbi_load("../assets/textures/container.jpg", &width, &height, &numberOfChannels, 0)};
+
+    unsigned int texture;
+    glGenTextures(1, &texture); // Generate 1 texture and assigns the ID to our "texture" variable
+
+    glBindTexture(GL_TEXTURE_2D, texture); // Bind it so any subsequent texture commands will configure our currently bound texture
+
+    if (data)
+    {
+        // Generates the texture image on the currently bound texture object at the active texture unit.
+        // Params are:
+        // target:          The texture target, typically one of GL_TEXTURE_1D, GL_TEXTURE_2D, GL_TEXTURE_3D
+        // level:           The level-of-detail number. 0 is the base image. n is the nth mipmap reduction image
+        // internalFormat:  The number of colour components in the texture
+        // width:           The width of the texture image
+        // height:          The height of the texture image
+        // border:          This value must always be 0 (some legacy stuff apparently)
+        // format:          The format of the pixel data
+        // type:            The data type of the pixel data
+        // data:            A pointer to the image data in memory
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+
+        // Generates the mipmaps for this texture. It derives all required mipmap images from the base level which should be set
+        // before calling this function. Each subsequent mipmap image is halved and generated until the mipmap image has a
+        // width or height of 1px
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture\n";
+    }
+    // Free the image data since we no longer need it
+    stbi_image_free(data);
 
     // Uncomment to draw as a wireframe
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -119,6 +159,8 @@ void part1(GLFWwindow *window)
         // Sets the current active shader program used in every subsequent shader and rendering call
         shader.use();
         shader.setFloat4("uniformColor", 0.0f, greenValue, 0.0f, 1.0f);
+
+        glBindTexture(GL_TEXTURE_2D, texture);
 
         glBindVertexArray(VAO);
         // Draw primitives using the currently active shader. Params are:

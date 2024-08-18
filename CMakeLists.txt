@@ -48,16 +48,23 @@ file(GLOB_RECURSE SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/*.cpp")
 
 add_executable(OpenglTutorial src/main.cpp ${SOURCE_FILES})
 
+# Copy the assets directory into the build directory
+add_custom_command(TARGET OpenglTutorial POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+  ${CMAKE_SOURCE_DIR}/assets $<TARGET_FILE_DIR:OpenglTutorial>/../assets
+)
+
 # Add GLFW as a subdirectory
 add_subdirectory(external/glfw)
 add_subdirectory(external/glad)
+add_subdirectory(external/stb_image)
 
 # Find and link OpenGL (this will be provided by the graphics drivers and the operating system)
 find_package(OpenGL REQUIRED)
 
 # Link the compiler flags and libraries to the executable
 target_link_libraries(OpenglTutorial PUBLIC opengl_tutorial_compiler_flags)
-target_link_libraries(OpenglTutorial PRIVATE glfw OpenGL::GL glad)
+target_link_libraries(OpenglTutorial PRIVATE glfw OpenGL::GL glad stb_image)
 
 # Ensure the include directories are correctly set
 target_include_directories(OpenglTutorial PRIVATE
