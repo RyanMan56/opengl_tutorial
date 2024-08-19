@@ -104,14 +104,20 @@ void part1(GLFWwindow *window)
     // We can unbind the VAO afterwards so other VAO calls won't accidentally modify this VAO (but this rarely happens so isn't really necessary)
     glBindVertexArray(0);
 
+    stbi_set_flip_vertically_on_load(true);
+
     // Load and create texture
     int width, height, numberOfChannels;
     unsigned char *data{stbi_load("../assets/textures/container.jpg", &width, &height, &numberOfChannels, 0)};
 
-    unsigned int texture;
-    glGenTextures(1, &texture); // Generate 1 texture and assigns the ID to our "texture" variable
+    unsigned int texture1;
+    glGenTextures(1, &texture1); // Generate 1 texture and assigns the ID to our "texture" variable
 
-    glBindTexture(GL_TEXTURE_2D, texture); // Bind it so any subsequent texture commands will configure our currently bound texture
+    // Activates the given texture unit. Any glBindTexture calls will now affect the given texture unit. Allows for binding
+    // multiple textures for a single drawing call (I guess similar to the relationship VAO and VBO have in managing state?)
+    glActiveTexture(GL_TEXTURE0);
+
+    glBindTexture(GL_TEXTURE_2D, texture1); // Bind it so any subsequent texture commands will configure our currently bound texture
 
     if (data)
     {
@@ -135,13 +141,38 @@ void part1(GLFWwindow *window)
     }
     else
     {
-        std::cout << "Failed to load texture\n";
+        std::cout << "Failed to load texture 1\n";
     }
     // Free the image data since we no longer need it
     stbi_image_free(data);
 
+    // Reuse data, width, height, numberOfChannels variables for this new image
+    data = stbi_load("../assets/textures/awesomeface.png", &width, &height, &numberOfChannels, 0);
+    unsigned int texture2;
+    glGenTextures(1, &texture2);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texture2);
+
+    if (data)
+    {
+        // Because we're loading a .png (which has an alpha component) instead of a .jpg we now need to specify that the image
+        // data contains an alpha channel as well by using GL_RGBA, otherwise OpenGL will incorrectly interpret the image data
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else
+    {
+        std::cout << "Failed to load texture 2\n";
+    }
+    stbi_image_free(data);
+
     // Uncomment to draw as a wireframe
     // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+    // Tell OpenGL which texture unit each sampler belongs to
+    shader.use();
+    shader.setInt("texture1", 0); // GL_TEXTURE0
+    shader.setInt("texture2", 1); // GL_TEXTURE1
 
     while (!glfwWindowShouldClose(window))
     {
@@ -160,7 +191,10 @@ void part1(GLFWwindow *window)
         shader.use();
         shader.setFloat4("uniformColor", 0.0f, greenValue, 0.0f, 1.0f);
 
-        glBindTexture(GL_TEXTURE_2D, texture);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture1);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, texture2);
 
         glBindVertexArray(VAO);
         // Draw primitives using the currently active shader. Params are:
