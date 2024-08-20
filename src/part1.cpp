@@ -20,16 +20,16 @@ void part1(GLFWwindow *window)
     // vertex we should be drawing. Otherwise we would have to include the commented out vertices below, which would add an overhead of 50%
     float vertices[]{
         // First triangle
-        // Positions      // Colors         // Texture coords
-        0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,  // top right
-        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
+        // Positions      // Colors         // Texture coords (using 0 - 2.0 to play around with the different wrapping methods)
+        0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 2.0f, 2.0f,  // top right
+        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 2.0f, 0.0f, // bottom right
         // -0.5f, 0.5f, 0.0f,  // top left
 
         // Second triangle
-        // Positions        // Colors       // Texture coords
+        // Positions        // Colors       // Texture coords (using 0 - 2.0 to play around with the different wrapping methods)
         // 0.5f, -0.5f, 0.0f,  // bottom right
         -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
-        -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f   // top left
+        -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 2.0f   // top left
     };
     unsigned int indices[]{
         0, 1, 3, // First triangle
@@ -119,6 +119,17 @@ void part1(GLFWwindow *window)
 
     glBindTexture(GL_TEXTURE_2D, texture1); // Bind it so any subsequent texture commands will configure our currently bound texture
 
+    // Texture axes are s, t, r. Possible wrapping modes are:
+    // - GL_REPEAT
+    // - GL_MIRRORED_REPEAT
+    // - GL_CLAMP_TO_EDGE
+    // - GL_CLAMP_TO_BORDER
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
     if (data)
     {
         // Generates the texture image on the currently bound texture object at the active texture unit.
@@ -152,6 +163,12 @@ void part1(GLFWwindow *window)
     glGenTextures(1, &texture2);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, texture2);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     if (data)
     {
