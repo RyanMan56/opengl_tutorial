@@ -1,16 +1,13 @@
+// Covers everything up to the end of this chapter:
+// https://learnopengl.com/Getting-started/Textures
 #include "part1.h"
 #include "shader.h"
+#include "utils.h"
 
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <stb_image/stb_image.h>
-
-void processInput(GLFWwindow *window)
-{
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
-}
 
 void part1(GLFWwindow *window)
 {
@@ -194,7 +191,7 @@ void part1(GLFWwindow *window)
     while (!glfwWindowShouldClose(window))
     {
         // Input
-        processInput(window);
+        Utils::processInput(window);
 
         // Rendering commands
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);

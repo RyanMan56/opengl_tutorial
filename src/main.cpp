@@ -1,4 +1,5 @@
 #include "part1.h"
+#include "part2.h"
 
 #include <iostream>
 #include <filesystem>
@@ -41,7 +42,8 @@ int main()
     glViewport(0, 0, framebufferWidth, framebufferHeight);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-    part1(window);
+    // part1(window);
+    part2(window);
 
     glfwTerminate();
 
