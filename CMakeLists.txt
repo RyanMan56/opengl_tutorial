@@ -58,13 +58,14 @@ add_custom_command(TARGET OpenglTutorial POST_BUILD
 add_subdirectory(external/glfw)
 add_subdirectory(external/glad)
 add_subdirectory(external/stb_image)
+add_subdirectory(external/glm)
 
 # Find and link OpenGL (this will be provided by the graphics drivers and the operating system)
 find_package(OpenGL REQUIRED)
 
 # Link the compiler flags and libraries to the executable
 target_link_libraries(OpenglTutorial PUBLIC opengl_tutorial_compiler_flags)
-target_link_libraries(OpenglTutorial PRIVATE glfw OpenGL::GL glad stb_image)
+target_link_libraries(OpenglTutorial PRIVATE glfw OpenGL::GL glad stb_image glm::glm)
 
 # Ensure the include directories are correctly set
 target_include_directories(OpenglTutorial PRIVATE
