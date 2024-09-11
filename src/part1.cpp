@@ -11,7 +11,7 @@
 
 void part1(GLFWwindow *window)
 {
-    Shader shader{"../shaders/basic.vs.glsl", "../shaders/basic.fs.glsl"};
+    Shader shader{"../shaders/part1_basic.vs.glsl", "../shaders/part1_basic.fs.glsl"};
 
     // We can use Element Buffer Objects to allow us to specify only the required vertices once, and then specify a separate array of indices to say which
     // vertex we should be drawing. Otherwise we would have to include the commented out vertices below, which would add an overhead of 50%
@@ -218,7 +218,7 @@ void part1(GLFWwindow *window)
         // glDrawArrays(GL_TRIANGLES, 0, 3); // NOTE: No longer using this since we're using an EBO instead. Now we're using glDrawElements
 
         // Takes its indices from the EBO currently bound to the GL_ELEMENT_ARRAY_BUFFER target which means we would have to bind the corresponding EBO each time.
-        // However, a VAO also keeps track of of EBO bindings. The last EBO that gets bound while a VAO is bound is stored as the VAO's Element Buffer Object.
+        // However, a VAO also keeps track of EBO bindings. The last EBO that gets bound while a VAO is bound is stored as the VAO's Element Buffer Object.
         // So therefore, binding to a VAO then automatically binds that EBO
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
