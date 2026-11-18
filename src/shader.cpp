@@ -1,11 +1,12 @@
 #include "shader.h"
 
-#include <glad/glad.h> // Include glad to get all of the required OpenGL headers
-
-#include <string>
 #include <fstream>
-#include <sstream>
+#include <glad/glad.h> // Include glad to get all of the required OpenGL headers
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
+#include <sstream>
+#include <string>
 
 void checkShaderCompilation(unsigned int &shader, std::string_view shaderType)
 {
@@ -97,20 +98,15 @@ Shader::Shader(const char *vertexPath, const char *fragmentPath)
     glLinkProgram(ID);
     checkShaderProgramLinkage(ID);
 
-    // Delete the shaders as they're linked into our program now and no longer necessary
+    // Delete the shaders as they're linked into our program now and no longer
+    // necessary
     glDeleteShader(vertex);
     glDeleteShader(fragment);
 }
 
-void Shader::deleteShaderProgram()
-{
-    glDeleteProgram(ID);
-}
+void Shader::deleteShaderProgram() { glDeleteProgram(ID); }
 
-void Shader::use()
-{
-    glUseProgram(ID);
-}
+void Shader::use() { glUseProgram(ID); }
 
 void Shader::setBool(const std::string &name, bool value)
 {
@@ -127,7 +123,15 @@ void Shader::setFloat(const std::string &name, float value)
     glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
 }
 
-void Shader::setFloat4(const std::string &name, float value0, float value1, float value2, float value3)
+void Shader::setFloat4(const std::string &name, float value0, float value1,
+                       float value2, float value3)
 {
-    glUniform4f(glGetUniformLocation(ID, name.c_str()), value0, value1, value2, value3);
+    glUniform4f(glGetUniformLocation(ID, name.c_str()), value0, value1, value2,
+                value3);
+}
+
+void Shader::setMatrix4fv(const std::string &name, glm::mat4 &matrix)
+{
+    glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE,
+                       glm::value_ptr(matrix));
 }

@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.15)
 # Will cause cmake to define the variables OpenglTutorial_VERSION_MAJOR and OpenglTutorial_VERSION_MINOR
 project(OpenglTutorial VERSION 1.0)
 
+# Lets clangd find include paths
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Provide a single source of truth for compiler flags
 add_library(opengl_tutorial_compiler_flags INTERFACE)
 target_compile_features(opengl_tutorial_compiler_flags INTERFACE cxx_std_20)

@@ -3,8 +3,8 @@
 #ifndef PART2_H
 #define PART2_H
 
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glad/glad.h>
 
 void part2(GLFWwindow *window);
 

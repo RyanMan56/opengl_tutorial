@@ -1,10 +1,10 @@
 #include "part1.h"
 #include "part2.h"
 
-#include <iostream>
+#include <GLFW/glfw3.h>
 #include <filesystem>
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#include <iostream>
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
@@ -19,10 +19,13 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 #ifdef __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // According to the tutorial this is needed for mac, but seems to work fine without for me
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT,
+                   GL_TRUE); // According to the tutorial this is needed for
+                             // mac, but seems to work fine without for me
 #endif
 
-    GLFWwindow *window = glfwCreateWindow(800, 600, "OpenGL Tutorial", NULL, NULL);
+    GLFWwindow *window =
+        glfwCreateWindow(800, 600, "OpenGL Tutorial", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window\n";
